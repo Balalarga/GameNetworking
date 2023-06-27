@@ -3,7 +3,7 @@
 #include "GameNetworking/TcpSocket.h"
 
 
-class AsyncListener: public AsioHandle, public IListenStrategy
+class AsyncListener: public AsioHandle, public IListener
 {
 public:
 	AsyncListener(TcpServer* server):
@@ -16,11 +16,11 @@ public:
 	void Listen(const std::shared_ptr<TcpSocket>& socket) override
 	{
 		_acceptor.async_accept(
-			socket->Socket(),
+			socket->AsioSocket(),
 			[socket](const asio::error_code& error)
 			{
-				Endpoint endpoint(socket->Socket().local_endpoint().address().to_string(),
-					socket->Socket().local_endpoint().port());
+				Endpoint endpoint(socket->AsioSocket().local_endpoint().address().to_string(),
+					socket->AsioSocket().local_endpoint().port());
 				if (!error)
 					std::cout << "Connected to " << endpoint << std::endl;
 				else

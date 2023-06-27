@@ -2,6 +2,7 @@
 #include <string>
 #include "asio/ip/tcp.hpp"
 
+
 struct Endpoint
 {
 	Endpoint(std::string host, uint16_t port): host(std::move(host)), port(port) { }

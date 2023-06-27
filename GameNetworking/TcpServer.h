@@ -9,7 +9,7 @@ class TcpServer: public AsioHandle
 public:
 	TcpServer(asio::io_context& context, Endpoint endpoint);
 
-	void Listen(std::unique_ptr<IListenStrategy>&& listener);
+	void Listen(std::unique_ptr<IListener>&& listener);
 
 	const Endpoint& GetEndpoint() const
 	{
@@ -19,5 +19,5 @@ public:
 
 private:
 	Endpoint _endpoint;
-	std::unique_ptr<IListenStrategy> _listener;
+	std::unique_ptr<IListener> _listener;
 };

@@ -4,35 +4,24 @@
 #include "Basic/TransferStrategies.h"
 
 
-class IReadableSocket
-{
-public:
-	virtual ~IReadableSocket() = default;
 
-	virtual void Read(std::unique_ptr<IReadStrategy>&& writer) = 0;
-};
-
-
-class IWritableSocket
-{
-public:
-	virtual ~IWritableSocket() = default;
-
-	virtual void Write(std::unique_ptr<IWriteStrategy>&& writer) = 0;
-};
-
-
-class TcpSocket: public AsioHandle, public IReadableSocket, public IWritableSocket, public std::enable_shared_from_this<TcpSocket>
+class TcpSocket: public AsioHandle, public IReadable, public IWritable
 {
 public:
 	TcpSocket(asio::io_context& context);
 
-	void Read(std::unique_ptr<IReadStrategy>&& reader) override;
-	void Write(std::unique_ptr<IWriteStrategy>&& writer) override;
+	void Read(std::unique_ptr<IReader>&& reader) override;
+	void Write(std::unique_ptr<IWrite>&& writer) override;
 
-	virtual void Connect(const Endpoint& endpoint, std::unique_ptr<IConnectionStrategy>&& connector);
+	template<class TConnector, class... TArgs>
+	requires std::is_base_of_v<IConnector, TConnector>
+	void Connect(const Endpoint& endpoint, TArgs&&... constructorArgs)
+	{
+		_connector = std::make_unique<TConnector>(this, std::forward<TArgs>(constructorArgs)...);
+		_connector->Connect(endpoint);
+	}
 
-	asio::ip::tcp::socket& Socket()
+	asio::ip::tcp::socket& AsioSocket()
 	{
 		return _socket;
 	}
@@ -41,7 +30,7 @@ public:
 private:
 	asio::ip::tcp::socket _socket;
 
-	std::unique_ptr<IReadStrategy> _reader;
-	std::unique_ptr<IWriteStrategy> _writer;
-	std::unique_ptr<IConnectionStrategy> _connector;
+	std::unique_ptr<IReader> _reader;
+	std::unique_ptr<IWrite> _writer;
+	std::unique_ptr<IConnector> _connector;
 };

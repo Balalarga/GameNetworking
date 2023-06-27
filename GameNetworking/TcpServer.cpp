@@ -9,7 +9,7 @@ TcpServer::TcpServer(asio::io_context& context, Endpoint endpoint):
 {
 }
 
-void TcpServer::Listen(std::unique_ptr<IListenStrategy>&& listener)
+void TcpServer::Listen(std::unique_ptr<IListener>&& listener)
 {
 	_listener = std::move(listener);
 	assert(_listener);

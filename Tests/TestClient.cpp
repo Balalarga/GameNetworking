@@ -12,24 +12,35 @@ int main(int argc, char* argv[])
 
 	std::shared_ptr<TcpClient> client = std::make_shared<TcpClient>(context);
 
-	class AsyncConnector: public IConnectionStrategy
+	class AsyncConnectorLocal: public AsyncConnector
 	{
 	public:
-		void Connect(const Endpoint& endpoint, TcpSocket* socket) override
+		using IConnector::IConnector;
+
+		virtual void OnConnect(const asio::error_code& ec)
 		{
-			socket->Socket().async_connect(
+			if (!ec)
+				std::cout << "Connected to " << GetEndpoint() << std::endl;
+			else
+				std::cout << "Connection error " << ec.message() << std::endl;
+		}
+
+		void Connect(const Endpoint& endpoint) override
+		{
+			std::shared_ptr<TcpSocket> socket = GetSocket().lock();
+			if (!socket)
+				return;
+
+			socket->AsioSocket().async_connect(
 				endpoint.AsioEndpoint(),
 				[endpoint](asio::error_code error)
 				{
-					if (!error)
-						std::cout << "Connected to " << endpoint << std::endl;
-					else
-						std::cout << "Connection error " << error.message() << std::endl;
+
 				});
 		}
 	};
 
-	client->Connect(endpoint, std::make_unique<AsyncConnector>());
+	client->Connect<AsyncConnector>(endpoint);
 
 	try
 	{

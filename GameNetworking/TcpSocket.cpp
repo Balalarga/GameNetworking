@@ -5,7 +5,7 @@ TcpSocket::TcpSocket(asio::io_context& context): AsioHandle(context), _socket(co
 {
 }
 
-void TcpSocket::Read(std::unique_ptr<IReadStrategy>&& reader)
+void TcpSocket::Read(std::unique_ptr<IReader>&& reader)
 {
 	// _reader = std::move(reader);
 	// assert(_reader);
@@ -15,7 +15,7 @@ void TcpSocket::Read(std::unique_ptr<IReadStrategy>&& reader)
 		// std::bind(&IReadStrategy::Read, *_reader, shared_from_this(), std::placeholders::_1));
 }
 
-void TcpSocket::Write(std::unique_ptr<IWriteStrategy>&& writer)
+void TcpSocket::Write(std::unique_ptr<IWrite>&& writer)
 {
 	// _writer = std::move(writer);
 	// assert(_writer);
@@ -24,9 +24,9 @@ void TcpSocket::Write(std::unique_ptr<IWriteStrategy>&& writer)
 		// std::bind(&IWriteStrategy::Write, *_writer, shared_from_this(), std::placeholders::_1));
 }
 
-void TcpSocket::Connect(const Endpoint& endpoint, std::unique_ptr<IConnectionStrategy>&& connector)
+void TcpSocket::Connect(const Endpoint& endpoint, std::unique_ptr<IConnector>&& connector)
 {
 	_connector = std::move(connector);
 	assert(_connector);
-	_connector->Connect(endpoint, this);
+	_connector->Connect(endpoint);
 }

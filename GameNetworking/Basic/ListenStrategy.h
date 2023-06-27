@@ -4,10 +4,10 @@ class TcpServer;
 class TcpSocket;
 
 
-class IListenStrategy
+class IListener
 {
 public:
-	virtual ~IListenStrategy() = default;
+	virtual ~IListener() = default;
 
 	virtual void Listen(const std::shared_ptr<TcpSocket>& socket) = 0;
 };
