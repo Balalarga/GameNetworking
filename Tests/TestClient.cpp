@@ -19,14 +19,14 @@ int main(int argc, char* argv[])
         void OnConnect(const std::shared_ptr<TcpSocket>& socket, const asio::error_code& ec) override
         {
             if (!ec)
-                std::cout << "Connected to " << socket->() << std::endl;
+                std::cout << "Connected to " << socket->GetEndpoint() << std::endl;
             else
                 std::cout << "Connection error " << ec.message() << std::endl;
         }
 
         void Connect(const Endpoint& endpoint) override
         {
-            TcpSocket* socket = GetSocket();
+	        std::shared_ptr<TcpSocket> socket = GetSharedSocket();
             if (!socket)
                 return;
 

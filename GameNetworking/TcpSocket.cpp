@@ -1,27 +1,25 @@
 ﻿#include "TcpSocket.h"
 
 
-TcpSocket::TcpSocket(asio::io_context& context): AsioHandle(context), _socket(context)
+TcpSocket::TcpSocket(asio::io_context& context): TcpSocket(context, Endpoint::LocalHost())
 {
 }
 
-void TcpSocket::Read(std::unique_ptr<IReader>&& reader)
+TcpSocket::TcpSocket(asio::io_context& context, Endpoint endpoint): AsioHandle(context), _endpoint(std::move(endpoint)),
+	_socket(context)
 {
-	// _reader = std::move(reader);
-	// assert(_reader);
-	// asio::async_read(
-		// _socket,
-		// asio::buffer(_reader->Buffer()),
-		// std::bind(&IReadStrategy::Read, *_reader, shared_from_this(), std::placeholders::_1));
 }
 
-void TcpSocket::Write(std::unique_ptr<IWrite>&& writer)
+void TcpSocket::Read(std::unique_ptr<IReader>&& newReader)
 {
-	// _writer = std::move(writer);
-	// assert(_writer);
-	// asio::async_write(_socket,
-		// asio::buffer(_writer->Buffer()),
-		// std::bind(&IWriteStrategy::Write, *_writer, shared_from_this(), std::placeholders::_1));
+	auto& reader = *_readers.emplace(std::move(newReader)).first;
+	reader->RequestReading(shared_from_this());
+}
+
+void TcpSocket::Write(std::unique_ptr<IWrite>&& newWriter)
+{
+	auto& writer = *_writers.emplace(std::move(newWriter)).first;
+	writer->RequestWriting(shared_from_this());
 }
 
 void TcpSocket::Connect(const Endpoint& endpoint, std::unique_ptr<IConnector>&& connector)
