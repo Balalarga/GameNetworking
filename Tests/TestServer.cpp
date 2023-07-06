@@ -36,10 +36,10 @@ private:
 
 int main(int argc, char* argv[])
 {
+	setlocale(LC_ALL, "Russian");
+
 	Endpoint endpoint("127.0.0.1", 2545);
 	std::cout << endpoint.AsioEndpoint().address().to_string() << ":" << endpoint.AsioEndpoint().port() << std::endl;
-
-	setlocale(LC_ALL, "Russian");
 
 	asio::io_context context;
 

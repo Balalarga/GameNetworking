@@ -34,6 +34,9 @@
 .vscode/
 .idea/
 [Dd]ebug/
+[Bb]uild/
 [Rr]elease/
 x64/
 x86/
+
+compile_commands.json

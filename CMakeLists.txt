@@ -8,14 +8,6 @@ set_property(GLOBAL PROPERTY USE_FOLDERS ON)
 project(GameNetworking LANGUAGES CXX)
 
 set(IS_MAIN_MODULE ${CMAKE_CURRENT_SOURCE_DIR} STREQUAL ${CMAKE_SOURCE_DIR})
-
-
-if (EXISTS ${CMAKE_CURRENT_BINARY_DIR}/compile_commands.json)
-    add_custom_target(compile_commands_link ALL
-        COMMAND ${CMAKE_COMMAND} -E create_hardlink ${CMAKE_CURRENT_BINARY_DIR}/compile_commands.json
-        ${CMAKE_CURRENT_SOURCE_DIR}/compile_commands.json)
-endif()
-
 set(MAIN_SOURCE_DIR GameNetworking)
 
 # Source files
@@ -36,4 +28,11 @@ target_include_directories(${PROJECT_NAME} PUBLIC
 
 if (${IS_MAIN_MODULE})
     add_subdirectory(Tests)
+endif()
+
+if (EXISTS ${CMAKE_CURRENT_BINARY_DIR}/compile_commands.json)
+    message("Copy compile_commands_link")
+    add_custom_target(compile_commands_link ALL
+        COMMAND ${CMAKE_COMMAND} -E create_hardlink ${CMAKE_CURRENT_BINARY_DIR}/compile_commands.json
+        ${CMAKE_CURRENT_SOURCE_DIR}/compile_commands.json)
 endif()

@@ -5,6 +5,11 @@
 
 struct Endpoint
 {
+	static Endpoint LocalHost(uint16_t port = 0)
+	{
+		return Endpoint("127.0.0.1", port);
+	}
+	
 	Endpoint(std::string host, uint16_t port): host(std::move(host)), port(port) { }
 
 	asio::ip::tcp::endpoint AsioEndpoint() const
