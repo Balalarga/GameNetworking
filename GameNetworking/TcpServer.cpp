@@ -3,9 +3,9 @@
 #include "TcpSocket.h"
 
 
-TcpServer::TcpServer(asio::io_context& context, Endpoint endpoint):
+TcpServer::TcpServer(asio::io_context& context, uint16_t port):
 	AsioHandle(context),
-	_endpoint(std::move(endpoint))
+	_endpoint(Endpoint::LocalHost(port))
 {
 }
 

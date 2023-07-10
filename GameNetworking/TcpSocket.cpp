@@ -10,19 +10,19 @@ TcpSocket::TcpSocket(asio::io_context& context, Endpoint endpoint): AsioHandle(c
 {
 }
 
-void TcpSocket::Read(std::unique_ptr<IReader>&& newReader)
+void TcpSocket::Read(std::unique_ptr<IAsyncReader>&& newReader)
 {
 	auto& reader = *_readers.emplace(std::move(newReader)).first;
 	reader->RequestReading(shared_from_this());
 }
 
-void TcpSocket::Write(std::unique_ptr<IWrite>&& newWriter)
+void TcpSocket::Write(std::unique_ptr<IAsyncWrite>&& newWriter)
 {
 	auto& writer = *_writers.emplace(std::move(newWriter)).first;
 	writer->RequestWriting(shared_from_this());
 }
 
-void TcpSocket::Connect(const Endpoint& endpoint, std::unique_ptr<IConnector>&& connector)
+void TcpSocket::AsyncConnect(const Endpoint& endpoint, std::unique_ptr<IConnector>&& connector)
 {
 	_connector = std::move(connector);
 	assert(_connector);

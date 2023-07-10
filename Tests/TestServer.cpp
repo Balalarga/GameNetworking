@@ -3,34 +3,48 @@
 #include "GameNetworking/TcpSocket.h"
 
 
-class AsyncListener: public AsioHandle, public IListener
+class Writer: public IAsyncWrite
 {
 public:
-	AsyncListener(TcpServer* server):
-		AsioHandle(
-			server->AsioContext()),
-			_acceptor(server->AsioContext(), server->GetEndpoint().AsioEndpoint())
+	WritingStatus AfterWrite(const std::shared_ptr<TcpSocket>& socket, size_t bytes, const asio::error_code& error) override
 	{
+		if (bytes == 0)
+			return WritingStatus::RepeatWrite;
+
+		std::cout << "[Server] Write " << bytes << " bytes\n";
+		_totalWritten += bytes;
+		if (_totalWritten == _buffer.size())
+			return WritingStatus::StopWrite;
+
+		return WritingStatus::RepeatWrite;
 	}
 
-	void Listen(const std::shared_ptr<TcpSocket>& socket) override
+	const TransferBuffer& Buffer() override
 	{
-		_acceptor.async_accept(
-			socket->AsioSocket(),
-			[socket](const asio::error_code& error)
-			{
-				Endpoint endpoint(socket->AsioSocket().local_endpoint().address().to_string(),
-					socket->AsioSocket().local_endpoint().port());
-				if (!error)
-					std::cout << "Connected to " << endpoint << std::endl;
-				else
-					std::cout << "Connection error " << error.message() << std::endl;
-			});
+		return _buffer;
 	}
 
 
 private:
-	asio::ip::tcp::acceptor _acceptor;
+	TransferBuffer _buffer;
+	size_t _totalWritten = 0;
+};
+
+
+class Listener: public AsyncListener
+{
+public:
+	using AsyncListener::AsyncListener;
+
+	void ConnectionEstablished() override
+	{
+		std::cout << "[Server] Connection established\n";
+		GetSharedSocket()->Write(std::make_unique<Writer>());
+	}
+	void ConnectionFailed(const asio::error_code& error) override
+	{
+		std::cout << "[Server] Connection failed with error: \"" << error.message() << "\"\n";
+	}
 };
 
 
@@ -38,14 +52,14 @@ int main(int argc, char* argv[])
 {
 	setlocale(LC_ALL, "Russian");
 
-	Endpoint endpoint("127.0.0.1", 2545);
-	std::cout << endpoint.AsioEndpoint().address().to_string() << ":" << endpoint.AsioEndpoint().port() << std::endl;
-
 	asio::io_context context;
 
-	auto server = std::make_shared<TcpServer>(context, endpoint);
+	auto server = std::make_shared<TcpServer>(context, 2545);
+	std::cout << "[Server] Started on "
+		<< server->GetEndpoint().AsioEndpoint().address().to_string() << ":"
+		<< server->GetEndpoint().AsioEndpoint().port() << std::endl;
 
-	server->Listen(std::make_unique<AsyncListener>(server.get()));
+	server->Listen(std::make_unique<Listener>(server.get()));
 
 	try
 	{

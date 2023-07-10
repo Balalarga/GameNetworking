@@ -21,10 +21,11 @@ private:
 class AsyncConnector: public IConnector
 {
 public:
-	AsyncConnector(const std::shared_ptr<TcpSocket>& sharedSocket);
+	AsyncConnector(std::shared_ptr<TcpSocket> sharedSocket);
 
 	void Connect(const Endpoint& endpoint) override;
-	virtual void OnConnect(const std::shared_ptr<TcpSocket>& socket, const asio::error_code& ec) = 0;
+	virtual void ConnectionEstablished() = 0;
+	virtual void ConnectionFailed(const asio::error_code& error) = 0;
 
 	const std::shared_ptr<TcpSocket>& GetSharedSocket() const
 	{
@@ -51,11 +52,11 @@ public:
 	
 	FunctionalAsyncConnector(const std::shared_ptr<TcpSocket>& sharedSocket, OnSuccess&& onSuccess, OnFailure&& onFailure);
 	
-	void OnConnect(const std::shared_ptr<TcpSocket>& socket, const asio::error_code& ec) override;
+	void ConnectionEstablished() override;
+	void ConnectionFailed(const asio::error_code& error) override;
 
 	
 private:
-	std::shared_ptr<TcpSocket> _sharedSocket;
 	OnSuccess _onSuccess;
 	OnFailure _onFailure;
 };

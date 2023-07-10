@@ -3,24 +3,28 @@
 #include "TcpSocket.h"
 
 
-void IWrite::RequestWriting(const std::shared_ptr<TcpSocket>& socket)
+void IAsyncWrite::RequestWriting(const std::shared_ptr<TcpSocket>& socket)
 {
-	async_write(
-		socket->AsioSocket(),
+	socket->AsioSocket().async_write_some(
 		asio::buffer(Buffer()),
 		[this, socket](const asio::error_code& error, size_t written)
 		{
-			Write(socket, written, error);
+			if (AfterWrite(socket, written, error) == WritingStatus::RepeatWrite)
+			{
+				RequestWriting(socket);
+			}
 		});
 }
 
-void IReader::RequestReading(const std::shared_ptr<TcpSocket>& socket)
+void IAsyncReader::RequestReading(const std::shared_ptr<TcpSocket>& socket)
 {
-	async_read(
-		socket->AsioSocket(),
+	socket->AsioSocket().async_read_some(
 		asio::buffer(Buffer()),
 		[this, socket](const asio::error_code& error, size_t written)
 		{
-			Read(socket, written, error);
+			if (AfterRead(socket, written, error) == ReadingStatus::RepeatRead)
+			{
+				RequestReading(socket);
+			}
 		});
 }

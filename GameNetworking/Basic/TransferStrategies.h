@@ -6,41 +6,57 @@
 class TcpSocket;
 
 
-class IWrite
+enum class WritingStatus
+{
+	RepeatWrite,
+	StopWrite
+};
+
+class IAsyncWrite
 {
 public:
-	virtual ~IWrite() = default;
+	virtual ~IAsyncWrite() = default;
 
 	virtual void RequestWriting(const std::shared_ptr<TcpSocket>& socket);
-	virtual bool Write(const std::shared_ptr<TcpSocket>& socket, size_t bytes, const asio::error_code& error) = 0;
+	virtual WritingStatus AfterWrite(const std::shared_ptr<TcpSocket>& socket, size_t bytes, const asio::error_code& error) = 0;
+
+	// Returns buffer with lifetime equals to IWriter
 	virtual const TransferBuffer& Buffer() = 0;
 };
 
 
-class IReader
+enum class ReadingStatus
+{
+	RepeatRead,
+	StopRead
+};
+
+class IAsyncReader
 {
 public:
-	virtual ~IReader() = default;
+	virtual ~IAsyncReader() = default;
 
 	virtual void RequestReading(const std::shared_ptr<TcpSocket>& socket);
-	virtual bool Read(const std::shared_ptr<TcpSocket>& socket, size_t bytes, const asio::error_code& error) = 0;
+	virtual ReadingStatus AfterRead(const std::shared_ptr<TcpSocket>& socket, size_t bytes, const asio::error_code& error) = 0;
+
+	// Returns buffer with lifetime equals to IWriter
 	virtual TransferBuffer& Buffer() = 0;
 };
 
 
-class IReadable
+class IAsyncReadable
 {
 public:
-	virtual ~IReadable() = default;
+	virtual ~IAsyncReadable() = default;
 
-	virtual void Read(std::unique_ptr<IReader>&& writer) = 0;
+	virtual void Read(std::unique_ptr<IAsyncReader>&& writer) = 0;
 };
 
 
-class IWritable
+class IAsyncWritable
 {
 public:
-	virtual ~IWritable() = default;
+	virtual ~IAsyncWritable() = default;
 
-	virtual void Write(std::unique_ptr<IWrite>&& writer) = 0;
+	virtual void Write(std::unique_ptr<IAsyncWrite>&& writer) = 0;
 };

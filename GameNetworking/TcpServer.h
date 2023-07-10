@@ -1,13 +1,13 @@
 ﻿#pragma once
 #include "Basic/AsioHandle.h"
 #include "Basic/Endpoint.h"
-#include "Basic/ListenStrategy.h"
+#include "Basic\ListenStrategies.h"
 
 
 class TcpServer: public AsioHandle
 {
 public:
-	TcpServer(asio::io_context& context, Endpoint endpoint);
+	TcpServer(asio::io_context& context, uint16_t port);
 
 	void Listen(std::unique_ptr<IListener>&& listener);
 

@@ -2,51 +2,42 @@
 #include "GameNetworking/TcpClient.h"
 
 
+class Reader: public IAsyncReader
+{
+public:
+	ReadingStatus AfterRead(const std::shared_ptr<TcpSocket>& socket, size_t bytes, const asio::error_code& error) override
+	{
+		return ReadingStatus::StopRead;
+	}
+
+	TransferBuffer& Buffer() override
+	{
+		return _buffer;
+	}
+
+private:
+	TransferBuffer _buffer;
+};
+
+
 int main(int argc, char* argv[])
 {
-    Endpoint endpoint("127.0.0.1", 2545);
     setlocale(LC_ALL, "Russian");
 
     asio::io_context context;
 
     std::shared_ptr<TcpClient> client = std::make_shared<TcpClient>(context);
 
-    class AsyncConnectorLocal : public AsyncConnector
-    {
-    public:
-        using AsyncConnector::AsyncConnector;
-
-        void OnConnect(const std::shared_ptr<TcpSocket>& socket, const asio::error_code& ec) override
-        {
-            if (!ec)
-                std::cout << "Connected to " << socket->GetEndpoint() << std::endl;
-            else
-                std::cout << "Connection error " << ec.message() << std::endl;
-        }
-
-        void Connect(const Endpoint& endpoint) override
-        {
-	        std::shared_ptr<TcpSocket> socket = GetSharedSocket();
-            if (!socket)
-                return;
-
-            socket->AsioSocket().async_connect(
-                endpoint.AsioEndpoint(),
-                [endpoint](asio::error_code error)
-                {
-                });
-        }
-    };
-    client->Connect(endpoint,
+    client->AsyncConnect(Endpoint::LocalHost(2545),
         std::make_unique<FunctionalAsyncConnector>(
             client,
             [](const std::shared_ptr<TcpSocket>& socket)
             {
-                std::cout << "Connection established" << std::endl;
+                std::cout << "[Client] Connection established" << std::endl;
             },
             [](const std::shared_ptr<TcpSocket>& socket, const asio::error_code& ec)
             {
-                std::cout << "Connection error: " << ec.message() << std::endl;
+                std::cout << "[Client] Connection error: " << ec.message() << std::endl;
             }));
 
     try
