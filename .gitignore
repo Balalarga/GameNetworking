@@ -39,4 +39,5 @@
 x64/
 x86/
 
+vcpkg_installed/
 compile_commands.json
