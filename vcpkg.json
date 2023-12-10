@@ -1,0 +1,10 @@
+{
+    "name": "game-networking",
+    "version": "0.1",
+    "dependencies": [
+        "nlohmann-json",
+        "fmt",
+        "grpc",
+        "protobuf"
+    ]
+}

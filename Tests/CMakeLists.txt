@@ -11,3 +11,22 @@ add_executable(TestClient TestClient.cpp)
 add_executable(TestServer TestServer.cpp)
 target_link_libraries(TestClient PRIVATE GameNetworking)
 target_link_libraries(TestServer PRIVATE GameNetworking)
+
+target_link_libraries(TestClient PUBLIC
+    nlohmann_json::nlohmann_json
+    gRPC::gpr
+    gRPC::grpc
+    gRPC::grpc++
+    protobuf::libprotobuf
+    gRPC::grpc++_alts
+    fmt::fmt
+)
+target_link_libraries(TestServer PUBLIC
+    nlohmann_json::nlohmann_json
+    gRPC::gpr
+    gRPC::grpc
+    gRPC::grpc++
+    protobuf::libprotobuf
+    gRPC::grpc++_alts
+    fmt::fmt
+)
